@@ -17,16 +17,21 @@ fi
 if [[ "$#" -eq 0 ]];then
   :
 
-elif [[ "$1" == "stdin" ]];then shift
+elif [[ "$1" == "test" ]];then shift
   # -p file is a pipe
+  # -s is non empty file
   if [[ -p /dev/stdin ]]; then
     echo "stdin:yes"
-    stdin_content="$(cat)"
-    echo "$stdin_content"
-    $0 stdin </dev/null
   else
     echo "stdin:no"
   fi
+
+elif [[ "$1" == "format" ]];then shift
+  sed \
+    -e '0,/^---/d' \
+    -e '/^Total/d' \
+  | awk '{if ($2 > 8000) {print $4,$3,$2}}' \
+  | sort 
 
 else
   echo "unknown command: $@" >&2
