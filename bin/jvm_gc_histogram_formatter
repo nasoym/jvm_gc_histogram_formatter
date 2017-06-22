@@ -8,6 +8,10 @@ while getopts "a:h" options; do case $options in
 esac; done; shift $((OPTIND - 1))
 
 : ${a:="default for var a"}
+
+: ${min_instances:="8000"}
+
+
 : ${trace:=0}
 if [[ "$trace" -eq 1 ]];then
   PS4='${LINENO}: '
@@ -25,6 +29,25 @@ elif [[ "$1" == "test" ]];then shift
   else
     echo "stdin:no"
   fi
+
+elif [[ "$1" == "clean" ]];then shift
+  sed \
+    -e '0,/^---/d' \
+    -e '/^Total/d' \
+  | awk \
+    -v min_instances="${min_instances}" \
+    '{if ($2 > min_instances) {print $4,$2,$3}}' \
+  | sort 
+
+elif [[ "$1" == "compare" ]];then shift
+  file1="$1"; shift
+  file2="$1"; shift
+
+  cat $file1 $file2 \
+    | gawk \
+    'BEGIN {} { if (a) {print "dddd"; }; a[$1]=$3;} END {for (i in a) { print i,a[i];}}'
+
+    # 'BEGIN {} { a[$1]=a[$1] " == " $2 " - " $3;} END {for (i in a) { print i,a[i];}}'
 
 elif [[ "$1" == "format" ]];then shift
   sed \
