@@ -40,14 +40,10 @@ elif [[ "$1" == "clean" ]];then shift
   | sort 
 
 elif [[ "$1" == "compare" ]];then shift
-  file1="$1"; shift
-  file2="$1"; shift
-
-  cat $file1 $file2 \
-    | gawk \
-    'BEGIN {} { if (!b) {b=4; }; a[$1]=$3;} END {for (i in a) { print i,a[i];}}'
-
-    # 'BEGIN {} { a[$1]=a[$1] " == " $2 " - " $3;} END {for (i in a) { print i,a[i];}}'
+  cat $@ \
+    | gawk  \
+    'BEGIN{} {a[$1]=a[$1] " " $3} END{for(i in a){split(a[i],b," ");if(length(b)>=3){print i, b[2]/b[1], b[3]/b[1] }}}'
+    # 'BEGIN{} {a[$1]=a[$1] " " $3} END{for(i in a){split(a[i],b," ");if(length(b)>=3){print i, b[1], b[2], b[3] }}}'
 
 elif [[ "$1" == "format" ]];then shift
   sed \
